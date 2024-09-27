@@ -5,6 +5,7 @@
 package dao;
 
 import connection.MySqlConnection;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,19 +21,19 @@ import model.EditorialModel;
  */
 public class EditorialDAO implements ICrudService<EditorialModel> {
     MySqlConnection conexion = new MySqlConnection();
-    
+
     @Override
     public List<EditorialModel> selectAll() {
         String sql = "SELECT * FROM editorial;";
         List<EditorialModel> editorials = new ArrayList<>();
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-       
+
         try {
             statement = conexion.getConnection().prepareStatement(sql);
             resultSet = statement.executeQuery();
-        
-            while (resultSet.next()) { 
+
+            while (resultSet.next()) {
                 EditorialModel editorial = new EditorialModel();
                 editorial.setId(resultSet.getInt("id"));
                 editorial.setNombre(resultSet.getString("nombre"));
@@ -40,10 +41,10 @@ public class EditorialDAO implements ICrudService<EditorialModel> {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 if (resultSet != null) {
-                resultSet.close();
+                    resultSet.close();
                 }
                 if (statement != null) {
                     statement.close();
@@ -52,7 +53,7 @@ public class EditorialDAO implements ICrudService<EditorialModel> {
                 e.printStackTrace();
             }
         }
-    
+
         return editorials;
     }
 
@@ -67,8 +68,8 @@ public class EditorialDAO implements ICrudService<EditorialModel> {
             System.out.println("Editorial insertedo existosamente!");
         } catch (SQLException e) {
             e.printStackTrace();
-            
-        } finally{
+
+        } finally {
             try {
                 statement.close();
             } catch (SQLException ex) {
@@ -79,38 +80,26 @@ public class EditorialDAO implements ICrudService<EditorialModel> {
 
     @Override
     public EditorialModel selectById(int id) {
-        
-        String sql = "SELECT * FROM editorial WHERE id = ?;";
+        String sql = "SELECT * FROM editorial WHERE id = ?";
         EditorialModel editorial = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-    
-        try {
-            statement = conexion.getConnection().prepareStatement(sql);
+
+        try (Connection connection = MySqlConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, id);
-            resultSet = statement.executeQuery();
-        
-        if (resultSet.next()) { 
-            editorial = new EditorialModel(); 
-            editorial.setId(resultSet.getInt("id"));
-            editorial.setNombre(resultSet.getString("nombre"));
-        }
-                
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    editorial = new EditorialModel();
+                    editorial.setId(resultSet.getInt("id"));
+                    editorial.setNombre(resultSet.getString("nombre"));
+                }
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
-            try {
-                if (resultSet != null) {
-                resultSet.close();
-                }
-                if (statement != null) {
-                    statement.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
-        
+
         return editorial;
     }
 
@@ -129,8 +118,8 @@ public class EditorialDAO implements ICrudService<EditorialModel> {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            
-        } finally{
+
+        } finally {
             try {
                 statement.close();
             } catch (SQLException ex) {
@@ -155,8 +144,8 @@ public class EditorialDAO implements ICrudService<EditorialModel> {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            
-        } finally{
+
+        } finally {
             try {
                 statement.close();
             } catch (SQLException ex) {
@@ -167,6 +156,7 @@ public class EditorialDAO implements ICrudService<EditorialModel> {
 
     @Override
     public List<EditorialModel> search(String keyword) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from
+                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

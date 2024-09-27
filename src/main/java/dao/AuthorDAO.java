@@ -5,6 +5,7 @@
 package dao;
 
 import connection.MySqlConnection;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -80,36 +81,23 @@ public class AuthorDAO implements ICrudService<AuthorModel> {
 
     @Override
     public AuthorModel selectById(int id) {
-        String sql = "SELECT * FROM autor WHERE id = ?;";
+        String sql = "SELECT * FROM autor WHERE id = ?";
+        AuthorModel autor = null;
 
-        AuthorModel autor = new AuthorModel();
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
+        try (Connection connection = MySqlConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
 
-        try {
-            statement = conexion.getConnection().prepareStatement(sql);
             statement.setInt(1, id);
-            resultSet = statement.executeQuery();
 
-            if (resultSet.next()) { // Check if there is a result
-                autor = new AuthorModel(); // Initialize the autor object if there is a result
-                autor.setId(resultSet.getInt("id"));
-                autor.setNombre(resultSet.getString("nombre"));
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    autor = new AuthorModel();
+                    autor.setId(resultSet.getInt("id"));
+                    autor.setNombre(resultSet.getString("nombre"));
+                }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-                if (statement != null) {
-                    statement.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
 
         return autor;

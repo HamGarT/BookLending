@@ -7,6 +7,7 @@ package connection;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -14,27 +15,25 @@ import com.zaxxer.hikari.HikariDataSource;
  * @author Hamer
  */
 public class MySqlConnection {
-    private Connection connection;
+    private static HikariDataSource dataSource;
 
-    public MySqlConnection() 
-    {
-        try 
-        {
-            // Cambia estos valores según tu configuración
-            String url = "jdbc:mysql://localhost:3306/bibliotecabd";
-            String user = "root";
-            String password = "root";
-            connection = DriverManager.getConnection(url, user, password);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    static {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:mysql://localhost:3306/bibliotecabd");
+        config.setUsername("root");
+        config.setPassword("root");
+        //config.addDataSourceProperty( "cachePrepStmts" , "true" );
+        //config.addDataSourceProperty( "prepStmtCacheSize" , "250" );
+        //config.addDataSourceProperty( "prepStmtCacheSqlLimit" , "2048" );
+        config.setMaximumPoolSize(20);
+        config.setConnectionTimeout(300000);
+        config.setConnectionTimeout(120000);
+        config.setLeakDetectionThreshold(300000);
+
+        dataSource = new HikariDataSource(config);
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public static Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
     }
 }
